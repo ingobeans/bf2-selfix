@@ -6,6 +6,8 @@ message_length = 0
 
 def on_key_press(event:keyboard.KeyboardEvent):
     global in_chat, selection_index, message_length
+    if event.name == "escape":
+        in_chat = False
     if event.name == "enter":
         in_chat = not in_chat
     elif in_chat and len(event.name) == 1 or event.name == "space":
