@@ -41,8 +41,7 @@ def on_key_press(event:keyboard.KeyboardEvent):
     elif event.name == "delete":
         if selection_index < len(message):
             message = remove_char_at_index(message, selection_index)
-    print(f"{message=}")
-    print(f"{selection_index=}")
+    print(insert_char_at_index(message,selection_index,"|"))
 
 keyboard.on_press(on_key_press)
 keyboard.wait()
