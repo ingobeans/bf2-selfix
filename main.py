@@ -1,8 +1,21 @@
+from PIL import ImageFont, ImageDraw, Image
 import keyboard, os
+
+font = ImageFont.truetype("malgun.ttf", 16.5)
+
+image = Image.new('RGB', (1, 1))
+draw = ImageDraw.Draw(image)
 
 in_chat = False
 selection_index = 0
 message = ""
+
+def calc_width(text):
+    text = "At least I dont need to spell to dominate"
+    bbox = draw.textbbox((0, 0), text, font=font)
+    width = bbox[2] - bbox[0]
+    height = bbox[3] - bbox[1]
+    return width,height
 
 def remove_char_at_index(s, index):
     return s[:index] + s[index+1:]
