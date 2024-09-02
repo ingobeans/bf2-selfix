@@ -53,8 +53,7 @@ window.show()
 def calc_width(text):
     bbox = draw.textbbox((0, 0), text, font=font)
     width = bbox[2] - bbox[0]
-    height = bbox[3] - bbox[1]
-    return width,height
+    return width 
 
 def remove_char_at_index(s, index):
     return s[:index] + s[index+1:]
@@ -98,7 +97,7 @@ def on_key_press(event:keyboard.KeyboardEvent):
     if in_chat:
         os.system("cls")
         print(insert_char_at_index(message,selection_index,"|"))
-        x_offset = calc_width(message[:selection_index])[0]
+        x_offset = calc_width(message[:selection_index])
         
         window.move_line(chat_start_x + x_offset, chat_start_y, chat_start_x + x_offset, chat_start_y - 10)
 
