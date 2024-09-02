@@ -30,8 +30,8 @@ app = QApplication(sys.argv)
 class TransparentLine(QWidget):
     def __init__(self):
         super().__init__()
-        self.start_point = QPoint(chat_start_x, chat_start_y)
-        self.end_point = QPoint(chat_start_x, chat_start_y)
+        self.start_point = QPoint(0, 0)
+        self.end_point = QPoint(0, 0)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.showFullScreen()
@@ -42,9 +42,9 @@ class TransparentLine(QWidget):
         painter.setPen(pen)
         painter.drawLine(self.start_point, self.end_point)
 
-    def update_line(self, selection_index):
-        self.start_point = QPoint(chat_start_x + selection_index, chat_start_y)
-        self.end_point = QPoint(chat_start_x + selection_index, chat_start_y - 10)
+    def move_line(self, x1, y1, x2, y2):
+        self.start_point = QPoint(x1,y1)
+        self.end_point = QPoint(x2,y2)
         self.update()
 
 window = TransparentLine()
@@ -64,15 +64,17 @@ def insert_char_at_index(s, index, char):
 
 def on_key_press(event:keyboard.KeyboardEvent):
     global in_chat, selection_index, message
-    if event.name == "escape":
+    if event.name == "esc":
         in_chat = False
         message = ""
         selection_index = 0
+        window.move_line(0,0,0,0)
     elif event.name == "enter":
         in_chat = not in_chat
         if not in_chat:
             message = ""
             selection_index = 0
+            window.move_line(0,0,0,0)
     elif in_chat and len(event.name) == 1 or event.name == "space":
         message = insert_char_at_index(message, selection_index, event.name if event.name != "space" else " ")
         selection_index += 1
@@ -96,7 +98,9 @@ def on_key_press(event:keyboard.KeyboardEvent):
     if in_chat:
         os.system("cls")
         print(insert_char_at_index(message,selection_index,"|"))
-        window.update_line(calc_width(message[:selection_index])[0])
+        x_offset = calc_width(message[:selection_index])[0]
+        
+        window.move_line(chat_start_x + x_offset, chat_start_y, chat_start_x + x_offset, chat_start_y - 10)
 
 keyboard.on_press(on_key_press)
 sys.exit(app.exec_())
