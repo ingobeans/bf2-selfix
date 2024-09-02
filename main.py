@@ -17,6 +17,8 @@ with open("config.yaml","r", encoding="utf-8") as f:
     config = yaml.safe_load(f)
 
 monitor_index = config["monitor index"]
+character_data = config["character data"]
+
 monitor = get_monitors()[monitor_index]
 chat_start_x = int(monitor.width * 0.714062)
 chat_start_y = int(monitor.height * 0.221296)
@@ -51,6 +53,13 @@ window = TransparentLine()
 window.show()
 
 def calc_width(text):
+    width = 0
+    for char in text:
+        char_width = 7
+        if char in character_data:
+            char_width = character_data[char]
+        width += char_width
+    return width
     bbox = draw.textbbox((0, 0), text, font=font)
     width = bbox[2] - bbox[0]
     return width 
@@ -74,7 +83,7 @@ def on_key_press(event:keyboard.KeyboardEvent):
             message = ""
             selection_index = 0
             window.move_line(0,0,0,0)
-    elif in_chat and len(event.name) == 1 or event.name == "space":
+    elif in_chat and (len(event.name) == 1 or event.name == "space"):
         message = insert_char_at_index(message, selection_index, event.name if event.name != "space" else " ")
         selection_index += 1
     elif event.name == "left":
