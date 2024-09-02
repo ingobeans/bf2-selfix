@@ -1,17 +1,56 @@
 from PIL import ImageFont, ImageDraw, Image
-import keyboard, os
+from screeninfo import get_monitors
+import keyboard, os, yaml, sys
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtWidgets import QApplication, QWidget
 
 font = ImageFont.truetype("malgun.ttf", 16.5)
-
 image = Image.new('RGB', (1, 1))
 draw = ImageDraw.Draw(image)
+
+if not os.path.isfile("config.yaml"):
+    print("no config.yaml file!")
+    quit()
+
+with open("config.yaml","r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+
+monitor_index = config["monitor index"]
+monitor = get_monitors()[monitor_index]
+chat_start_x = int(monitor.width * 0.714062)
+chat_start_y = int(monitor.height * 0.221296)
 
 in_chat = False
 selection_index = 0
 message = ""
 
+app = QApplication(sys.argv)
+
+class TransparentLine(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.start_point = QPoint(chat_start_x, chat_start_y)
+        self.end_point = QPoint(chat_start_x, chat_start_y)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.showFullScreen()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        pen = QPen(Qt.red, 2)
+        painter.setPen(pen)
+        painter.drawLine(self.start_point, self.end_point)
+
+    def update_line(self, selection_index):
+        self.start_point = QPoint(chat_start_x + selection_index, chat_start_y)
+        self.end_point = QPoint(chat_start_x + selection_index, chat_start_y - 10)
+        self.update()
+
+window = TransparentLine()
+window.show()
+
 def calc_width(text):
-    text = "At least I dont need to spell to dominate"
     bbox = draw.textbbox((0, 0), text, font=font)
     width = bbox[2] - bbox[0]
     height = bbox[3] - bbox[1]
@@ -57,6 +96,7 @@ def on_key_press(event:keyboard.KeyboardEvent):
     if in_chat:
         os.system("cls")
         print(insert_char_at_index(message,selection_index,"|"))
+        window.update_line(calc_width(message[:selection_index])[0])
 
 keyboard.on_press(on_key_press)
-keyboard.wait()
+sys.exit(app.exec_())
