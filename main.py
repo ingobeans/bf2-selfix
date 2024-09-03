@@ -1,6 +1,6 @@
 from PIL import ImageFont, ImageDraw, Image
 from screeninfo import get_monitors
-import keyboard, os, yaml, sys
+import keyboard, os, yaml, sys, pydirectinput
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -61,15 +61,38 @@ def calc_width(text):
             char_width = character_data[char]
         width += char_width
     return width
-    bbox = draw.textbbox((0, 0), text, font=font)
-    width = bbox[2] - bbox[0]
-    return width 
 
 def remove_char_at_index(s, index):
     return s[:index] + s[index+1:]
 
 def insert_char_at_index(s, index, char):
     return s[:index] + char + s[index:]
+
+def handle_command(command):
+    args = command.split(" ")
+    keyword = args.pop(0)
+    match keyword:
+        case "help":
+            print("test command!")
+        case _:
+            return
+
+def on_enter(event:keyboard.KeyboardEvent):
+    global in_chat, selection_index, message
+    in_chat = not in_chat
+    if not in_chat:
+        if message.startswith("/"):
+            command = message.removeprefix("/")
+            pydirectinput.press("esc")
+            handle_command(command)
+            message = ""
+            selection_index = 0
+            window.move_line(0,0,0,0)
+            return False
+        message = ""
+        selection_index = 0
+        window.move_line(0,0,0,0)
+    return True
 
 def on_key_press(event:keyboard.KeyboardEvent):
     global in_chat, selection_index, message
@@ -79,11 +102,7 @@ def on_key_press(event:keyboard.KeyboardEvent):
         selection_index = 0
         window.move_line(0,0,0,0)
     elif event.name == "enter":
-        in_chat = not in_chat
-        if not in_chat:
-            message = ""
-            selection_index = 0
-            window.move_line(0,0,0,0)
+        pass
     elif in_chat and (len(event.name) == 1 or event.name == "space"):
         message = insert_char_at_index(message, selection_index, event.name if event.name != "space" else " ")
         selection_index += 1
@@ -105,11 +124,12 @@ def on_key_press(event:keyboard.KeyboardEvent):
         if selection_index < len(message):
             message = remove_char_at_index(message, selection_index)
     if in_chat:
-        os.system("cls")
-        print(insert_char_at_index(message,selection_index,"|"))
+        #os.system("cls")
+        #print(insert_char_at_index(message,selection_index,"|"))
         x_offset = calc_width(message[:selection_index])
         
         window.move_line(chat_start_x + x_offset, chat_start_y, chat_start_x + x_offset, chat_start_y - 10)
 
+keyboard.on_press_key("enter",on_enter,True)
 keyboard.on_press(on_key_press)
 sys.exit(app.exec_())
