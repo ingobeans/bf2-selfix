@@ -2,7 +2,7 @@ from PIL import ImageFont, ImageDraw, Image
 from screeninfo import get_monitors
 import keyboard, os, yaml, sys
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtGui import QPainter, QPen, QColor
 from PyQt5.QtWidgets import QApplication, QWidget
 
 font = ImageFont.truetype("malgun.ttf", 16.5)
@@ -18,6 +18,7 @@ with open("config.yaml","r", encoding="utf-8") as f:
 
 monitor_index = config["monitor index"]
 character_data = config["character data"]
+color = config["color"]
 
 monitor = get_monitors()[monitor_index]
 chat_start_x = int(monitor.width * 0.714062)
@@ -40,7 +41,7 @@ class TransparentLine(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        pen = QPen(Qt.red, 2)
+        pen = QPen(QColor("#"+color), 2)
         painter.setPen(pen)
         painter.drawLine(self.start_point, self.end_point)
 
